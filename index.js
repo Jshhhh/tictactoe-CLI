@@ -2,6 +2,7 @@ var prompt = require('prompt');
 let board = [['','',''],['','',''],['','','']];
 let player1 = '';
 let player2 = '';
+let turn = true;
 
 const displayBoard = () => {
   let string = '';
@@ -17,10 +18,33 @@ const displayBoard = () => {
     }
   }
   console.log(string);
-}
+};
 
+//starts prompt
 prompt.start();
 
+//starts move for current player
+const playerMove = (turn) => {
+  prompt.get({
+    name: turn ? `${player1} move` : `${player2} move`,
+    type: 'string',
+    required: true
+  }, (err, result) => {
+    let currentPlayer = turn ? player1 : player2;
+    let move = result[`${currentPlayer} move`].split('').map(elem => parseInt(elem) - 1);
+    if (!board[move[0]][move[1]] && board[move[0]][move[1]] !== undefined) {
+      board[move[0]][move[1]] = turn ? 'X' : 'O';
+      turn = !turn;
+      displayBoard();
+      playerMove(turn);
+    } else {
+      console.log('Invalid Move');
+      playerMove();
+    }
+  });
+};
+
+//Initialize player names
 prompt.get(['player1', 'player2'], function (err, result) {
   player1 = result.player1;
   player2 = result.player2;
@@ -28,19 +52,5 @@ prompt.get(['player1', 'player2'], function (err, result) {
   console.log(' player1: ' + result.player1);
   console.log(' player2: ' + result.player2);
   displayBoard();
-  
-  prompt.get({
-    name: `${player1} move`,
-    type: 'string',
-    required: true
-  }, (err, result) => {
-    console.log(result);
-    let move = result[`${player1} move`].split('').map(elem => parseInt(elem));
-    if (!board[move[0]][move[1]]) {
-      board[move[0]][move[1]] = 'X';
-      displayBoard();
-    } else {
-      console.log('Invalid Move');
-    }
-  });
+  playerMove(turn);
 });
